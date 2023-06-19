@@ -13,6 +13,15 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def check_for_subpages(url):
+    response = requests.get(url)
+    html_content = response.text
+    soup = BeautifulSoup(html_content, 'html.parser')
+    div_element = soup.find('h1', class_='b-404__title')
+    if div_element:
+        return 404
+    else:
+        return 200
 
 def get_website_title(url):
     response = requests.get(url)
@@ -31,7 +40,7 @@ def find_mpd_url(url):
     desired_capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
     options = webdriver.ChromeOptions()
 
-    options.add_argument('--headless')  
+    #options.add_argument('--headless')  
     driver = webdriver.Chrome(options=options)
     driver.get(url)
 
@@ -84,6 +93,7 @@ def download_mpd_stream(url,title="output"):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPD Stream Downloader')
     parser.add_argument('url', nargs='?', help='URL of the website to scan')
+    parser.add_argument('-i', '--input', nargs=2, type=int, help='Two numbers  that are taken as a range and replaces the $i')
     args = parser.parse_args()
 
 
@@ -91,9 +101,17 @@ if __name__ == '__main__':
         args.url = input("Enter the URL of the website to scan: ")
 
     # if url has $i then create 
-    if "$i" in args.url:
-        
-        args.url = args.url.replace("$i", "1")
+    if "X" in args.url:
+        for i in range(args.input[0], args.input[1]):
+            tmpurl = args.url.replace("X", str(i))
+            status =check_for_subpages(tmpurl)
+            print(f'Checking {tmpurl}...status {status}' )
+            if status == 200:
+                mpd_url = find_mpd_url(tmpurl)
+                download_mpd_stream(mpd_url, get_website_title(tmpurl))
+    else:
+        print(args.url)
+
 
     mpd_url = find_mpd_url(args.url)
     if mpd_url:
