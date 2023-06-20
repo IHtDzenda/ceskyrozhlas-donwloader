@@ -40,7 +40,7 @@ def find_mpd_url(url):
     desired_capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
     options = webdriver.ChromeOptions()
 
-    #options.add_argument('--headless')  
+    options.add_argument('--headless')  
     driver = webdriver.Chrome(options=options)
     driver.get(url)
 
@@ -102,6 +102,16 @@ if __name__ == '__main__':
 
     # if url has $i then create 
     if "X" in args.url:
+        #-----------------------TRY FOR THE SOURCE URL withou any parametrs
+        try:
+            tmpurl = args.url.replace("-X", "")
+            status =check_for_subpages(tmpurl)
+            print(f'Checking {tmpurl}...status {status}' )
+            if status == 200:
+                mpd_url = find_mpd_url(tmpurl)
+                download_mpd_stream(mpd_url, get_website_title(tmpurl))
+        except Exception as e:
+            pass
         for i in range(args.input[0], args.input[1]):
             tmpurl = args.url.replace("X", str(i))
             status =check_for_subpages(tmpurl)

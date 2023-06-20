@@ -1,2 +1,4 @@
 test.py
 network_log.json
+*.part
+*.mp3
