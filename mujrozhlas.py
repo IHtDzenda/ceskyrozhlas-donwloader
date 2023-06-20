@@ -3,6 +3,8 @@ import youtube_dl
 import time
 import json
 import logging
+import requests
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -10,20 +12,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from colorama import init, Fore
 
-import requests
-from bs4 import BeautifulSoup
-
-class TextColor:
-    BLACK = '\033[30m'
-    RED = '\033[31m'
-    GREEN = '\033[32m'
-    YELLOW = '\033[33m'
-    BLUE = '\033[34m'
-    MAGENTA = '\033[35m'
-    CYAN = '\033[36m'
-    WHITE = '\033[37m'
-    RESET = '\033[0m'
+init()#start colorama
 
 
 def check_if_pageexists(url):
@@ -90,7 +81,7 @@ def find_mpd_url(url):
         except Exception as e:
             pass
 
-    print(TextColor.RED + 'Nebyla nalezena adressa MPD streamu' + TextColor.RESET)
+    print(Fore.RED + 'Nebyla nalezena adressa MPD streamu' + Fore.RESET)
     return None
 
 
@@ -103,17 +94,17 @@ def download_mpd_stream(url,title="output"):
         'merge_output_format': 'mp3',
         'outtmpl': f'{title}.mp3',
     }
-    print(TextColor.GREEN + f'---------------[Downloading]----------------'+TextColor.RESET)
+    print(Fore.GREEN + f'---------------[Downloading]----------------'+Fore.RESET)
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
-    print(TextColor.GREEN + f'-------------------[DONE]-------------------'+TextColor.RESET)
+    print(Fore.GREEN + f'-------------------[DONE]-------------------'+Fore.RESET)
 
 
 if __name__ == '__main__':
     #arguments
     parser = argparse.ArgumentParser(description='MPD Stream Downloader')
     parser.add_argument('url', nargs='?', help='URL of the website to scan')
-    parser.add_argument('-i', '--input', nargs=1, type=int, help='Range of nubers from 0 to X that are taken as a range and replaces the X in the url ')
+    parser.add_argument('-i', '--input', nargs='?',default=50, type=int, help='Range of nubers from 0 to X that are taken as a range and replaces the X in the url ')
     args = parser.parse_args()
     if not args.url:
         args.url = input("Enter the URL of the website to scan \n=> ")
@@ -121,52 +112,62 @@ if __name__ == '__main__':
     # if url has $i then create 
     if "X" in args.url:
         #-----------------------TRY FOR THE SOURCE URL withou any parametrs
+        timeoutcap=7
+        timeout=0
         try:
             tmpurl = args.url.replace("-X", "")
-            print(TextColor.YELLOW +'Checking for:'+TextColor.RESET)
-            print('=>'+TextColor.BLUE+tmpurl+TextColor.RESET)
+            print(Fore.YELLOW +'Checking for:'+Fore.RESET)
+            print('=>'+Fore.BLUE+tmpurl+Fore.RESET)
             status =check_if_pageexists(tmpurl)
 
             if status == 200:
-                print(TextColor.GREEN +f'=>Status {status} - OK'+TextColor.RESET )
+                print(Fore.GREEN +f'=>Status {status} - OK'+Fore.RESET )
                 mpd_url = find_mpd_url(tmpurl)
                 website_title = get_website_title(tmpurl)
-                print(TextColor.MAGENTA +f'=>File name: {website_title}.mp3'+TextColor.RESET )
+                print(Fore.MAGENTA +f'=>File name: {website_title}.mp3'+Fore.RESET )
                 download_mpd_stream(mpd_url,website_title)
             else:
-                print(TextColor.RED + f'=>Status {status} - Failed page not found' +TextColor.RESET)
+                print(Fore.RED + f'=>Status {status} - Failed page not found' +Fore.RESET)
         except Exception as e:
             pass
 
-        for i in range(0, args.input[0]):
+        for i in range(0, args.input):
             tmpurl = args.url.replace("X", str(i))
             status =check_if_pageexists(tmpurl)
-            print(TextColor.YELLOW +'Checking for:'+TextColor.RESET)
-            print('=>'+TextColor.MAGENTA+tmpurl+TextColor.RESET)
+            print(Fore.YELLOW +'Checking for:'+Fore.RESET)
+            print('=>'+Fore.MAGENTA+tmpurl+Fore.RESET)
+            if timeoutcap==timeout:
+                print(Fore.RED + '-----------------ERROR-----------------' +Fore.RESET)
+                print(Fore.RED + f'WEBSITE TIMEOUT TO MANY FAILED URLS ' +Fore.RESET)
+                print(Fore.RED + f'            !!!EXITING!!!           ' +Fore.RESET)
+                exit()
+
             if status == 200:
-                print(TextColor.GREEN +f'=>Status {status} - OK'+TextColor.RESET)
+                print(Fore.GREEN +f'=>Status {status} - OK'+Fore.RESET)
                 mpd_url = find_mpd_url(tmpurl)
                 website_title = get_website_title(tmpurl)
-                print(TextColor.BLUE +f'=>File name: {website_title}.mp3'+TextColor.RESET )
+                print(Fore.BLUE +f'=>File name: {website_title}.mp3'+Fore.RESET )
                 download_mpd_stream(mpd_url,website_title)
             else:
-                print(TextColor.RED + f'=>Status {status} - Failed page not found' +TextColor.RESET)
+                timeout=timeout+1
+                print(Fore.RED + f'=>Status {status} - Failed page not found' +Fore.RESET)
+            
     else:
         status =check_if_pageexists(args.url)
-        print(TextColor.YELLOW +'Checking for:'+TextColor.RESET)
-        print('=>'+TextColor.MAGENTA+args.url+TextColor.RESET)
+        print(Fore.YELLOW +'Checking for:'+Fore.RESET)
+        print('=>'+Fore.MAGENTA+args.url+Fore.RESET)
         if status == 200:
-            print(TextColor.GREEN +f'=>Status {status} - OK'+TextColor.RESET)
+            print(Fore.GREEN +f'=>Status {status} - OK'+Fore.RESET)
             mpd_url = find_mpd_url(args.url)
             website_title = get_website_title(args.url)
-            print(TextColor.BLUE +f'=>File name: {website_title}.mp3'+TextColor.RESET )
+            print(Fore.BLUE +f'=>File name: {website_title}.mp3'+Fore.RESET )
             download_mpd_stream(mpd_url,website_title)
         else:
-            print(TextColor.RED + f'=>Status {status} - Failed page not found' +TextColor.RESET)
+            print(Fore.RED + f'=>Status {status} - Failed page not found' +Fore.RESET)
 
 
 
     if mpd_url:
         download_mpd_stream(mpd_url, get_website_title(args.url))
     else:
-        print(TextColor.RED +'No  stream found on the website.'+TextColor.RESET)
+        print(Fore.RED +'No  stream found on the website.'+Fore.RESET)
