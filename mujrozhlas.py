@@ -136,12 +136,6 @@ if __name__ == '__main__':
             status =check_if_pageexists(tmpurl)
             print(Fore.YELLOW +'Checking for:'+Fore.RESET)
             print('=>'+Fore.MAGENTA+tmpurl+Fore.RESET)
-            if timeoutcap==timeout:
-                print(Fore.RED + '-----------------ERROR-----------------' +Fore.RESET)
-                print(Fore.RED + f'WEBSITE TIMEOUT TO MANY FAILED URLS ' +Fore.RESET)
-                print(Fore.RED + f'            !!!EXITING!!!           ' +Fore.RESET)
-                exit()
-
             if status == 200:
                 print(Fore.GREEN +f'=>Status {status} - OK'+Fore.RESET)
                 mpd_url = find_mpd_url(tmpurl)
