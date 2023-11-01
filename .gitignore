@@ -1,4 +1,3 @@
-test.py
-network_log.json
-*.part
-*.mp3
+.vscode
+bin
+obj
