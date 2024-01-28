@@ -1,11 +1,11 @@
-# Downloader for  muj-rozhlas.cz
-This tool allows you to download audio from  muj-rozhlas.cz
+# Downloader for muj-rozhlas.cz
+This tool allows you to download audio from muj-rozhlas.cz
 
-This program uses [ffmpge](https://github.com/FFmpeg/FFmpeg) 
+This program uses [ffmpeg](https://github.com/FFmpeg/FFmpeg) 
 
 # Installation
 You will need:
-- ffmpeg 
+ - ffmpeg 
 
 [windows](https://www.wikihow.com/Install-FFmpeg-on-Windows) 
 [other](https://ffmpeg.org/)
@@ -29,4 +29,4 @@ In case something doesn't work:
 
 ## Note
 This program was created solely for **educational purposes**. 
-This program is a learning example of its not meant to be used in the real world "web scraping"
+This program is a learning example; its not meant to be used in real world "web scraping"
