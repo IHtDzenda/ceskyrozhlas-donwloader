@@ -51,20 +51,20 @@ namespace MyApp
         StreamReader reader = new StreamReader(stream);
         string content = await reader.ReadToEndAsync();
 
-        string pattern = path.Replace("/", @"\/") + "[0-9]{7}";
-        foreach (Match m in Regex.Matches(content, pattern))
+        string pattern = @"<a href=.(.*). class=.m-chapters__link..*>";
+        RegexOptions options = RegexOptions.Multiline;
+        foreach (Match m in Regex.Matches(content, pattern, options))
         {
-          if (
-              Uri.TryCreate(
-                  "https://www.mujrozhlas.cz" + m.Value.Replace("\" c", ""),
-                  UriKind.Absolute,
-                  out Uri resultUri
-              )
-          )
+          if (m.Success)
           {
-            if (!urls.Contains(resultUri.AbsoluteUri))
+            string firstGroup = m.Groups[1].Value;
+            Console.WriteLine(firstGroup);
+            if (Uri.TryCreate("https://www.mujrozhlas.cz" + firstGroup, UriKind.Absolute, out Uri resultUri))
             {
-              urls.Add(resultUri.AbsoluteUri);
+              if (!urls.Contains(resultUri.AbsoluteUri))
+              {
+                urls.Add(resultUri.AbsoluteUri);
+              }
             }
           }
         }
